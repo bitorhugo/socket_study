@@ -21,10 +21,7 @@ int main(int argc, char **argv) {
   struct hostent *h; /* info about server */
   struct sockaddr_in channel; /* holds IP address */
   
-  if (argc != 3) {
-      printf("Usage: is-client server-name message-to-deliever\n");
-      exit(EXIT_FAILURE);
-  }
+	char message [64] = "hello there you\0";
 
   h = gethostbyname(argv[1]); /* look up host's IP address */
   if (!h) {
@@ -49,9 +46,8 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
   }
   
-  
   /* Connection is now established. Send message plus \0 byte at the end */
-  write(s, argv[2], strlen(argv[2])+1);
+	write(s, message, strlen(message));
   
   while (1) {
       bytes = read(s, buf, BUF_SIZE); /* read from socket */

@@ -33,18 +33,21 @@ int main (int argc, char** argv) {
       perror("Usage: socket");
       exit(EXIT_FAILURE);
   }
+	printf("Socket Created\n");
   
   b = bind(s, (struct sockaddr *) &channel_srv, sizeof(channel_srv));
   if (b < 0) {
       perror("Usage: bind");
       exit(EXIT_FAILURE);
   }
+	printf("Bind done\n");
 
   l = listen(s, QUEUE_SZ); /* specify queue size */
   if (l < 0) {
       perror("Usage: listen");
       exit(EXIT_FAILURE);
   }
+	printf("Listening..\n");
 
 	/* Socket is now set up and bound. Wait for connection and process it. */
   while (1) {
@@ -53,16 +56,20 @@ int main (int argc, char** argv) {
         perror("Accept");
         continue;
     }
-    
+		printf("Conn accepted\n");
+		  
 		/* reads content received from client */
     if((bytes = read(sa, buf, BUF_SZ)) <= 0){
         close(sa);
     }
+		printf("Message received\n");
 
 		/* write message to socket */
 		write(sa, buf, strlen(buf));
+		printf("3-Message sent\n");
 
     close(sa);  /* close connection */
+		printf("4-Conn closed\n");
   }
 
 	return 0;
