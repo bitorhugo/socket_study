@@ -31,7 +31,7 @@ int main (int argc, char** argv) {
   /* Build address structure to bind to socket. */
 	for (size_t i = 0; i < np; i++) {
 		memset(&channel_srv[i], 0, sizeof(channel_srv)); /* zero channel */
-  	channel_srv[i].sin_family = AF_LOCAL;
+  	channel_srv[i].sin_family = AF_INET;
   	channel_srv[i].sin_addr.s_addr = htonl(INADDR_ANY);
   	channel_srv[i].sin_port = htons(ports[i]);
 
