@@ -25,26 +25,23 @@ int main(int argc, char **argv) {
 
   h = gethostbyname(argv[1]); /* look up host's IP address */
   if (!h) {
-      perror("gethostbyname");
+      perror("Usage: gethostbyname");
       exit(EXIT_FAILURE);
   }
   
   s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (s < 0) {
-      perror("socket");
+      perror("Usage: socket");
       exit(EXIT_FAILURE);
   }
   
   memset(&channel, 0, sizeof(channel));
   channel.sin_family = AF_INET;
   memcpy(&channel.sin_addr.s_addr, h->h_addr, h->h_length);
-  channel.sin_port= htons(SERVER_PORT);
+  channel.sin_port = htons(SERVER_PORT);
 
-  c = connect(s, (struct sockaddr *) &channel, sizeof(channel));
-  if (c < 0) {
-      perror("connect");
-      exit(EXIT_FAILURE);
-  }
+	c = connect(s, (struct sockaddr *) &channel, sizeof(channel));
+	if (c < 0) { perror("Usage: connect"); }
   
   /* Connection is now established. Send message plus \0 byte at the end */
 	write(s, message, strlen(message));
