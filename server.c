@@ -10,10 +10,35 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #define PORT 10010
 #define QUEUE_SZ 5
 #define BUF_SZ 4096
+
+typedef struct mystruct {
+	int client_socket;
+} MYSTRUCT;
+
+void* handler (void* arg) {
+		MYSTRUCT* sa = (MYSTRUCT*)arg;
+		char buffer [4096];
+
+		int bytes = 0;
+    if((bytes = read(sa->client_socket, buffer, BUF_SZ)) <= 0){
+        close(sa->client_socket);
+    }
+		printf("Message received\n");
+
+		/* write message to socket */
+		write(sa->client_socket, buffer, strlen(buffer));
+		printf("3-Message sent\n");
+
+    close(sa->client_socket);  /* close connection */
+		printf("4-Conn closed\n");
+
+	return NULL;
+}
 
 int main (int argc, char** argv) {
 
@@ -57,19 +82,19 @@ int main (int argc, char** argv) {
         continue;
     }
 		printf("Conn accepted\n");
-		  
-		/* reads content received from client */
-    if((bytes = read(sa, buf, BUF_SZ)) <= 0){
-        close(sa);
-    }
-		printf("Message received\n");
+		
+		pthread_t tid;
+		MYSTRUCT info;
+		info.client_socket = sa;
+		int ok_ = pthread_create(&tid, NULL, handler, (void*) &info);
+		if (ok_ != 0) {
+			perror("Usage: pthread_create");
+			exit(EXIT_FAILURE);
+		}
 
-		/* write message to socket */
-		write(sa, buf, strlen(buf));
-		printf("3-Message sent\n");
+		// make it so server doesn't block until request is handled
+		pthread_detach(tid);
 
-    close(sa);  /* close connection */
-		printf("4-Conn closed\n");
   }
 
 	return 0;
