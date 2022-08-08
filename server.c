@@ -15,27 +15,25 @@
 #define PORT 10010
 #define QUEUE_SZ 5
 #define BUF_SZ 4096
+#define INT2VOIDPTR(i) (void*)(uintptr_t)(i)
 
-typedef struct mystruct {
-	int client_socket;
-} MYSTRUCT;
 
-void* handler (void* arg) {
-		MYSTRUCT* sa = (MYSTRUCT*)arg;
-		char buffer [4096];
+void* handler (void* args) {
+	int *client_socket = (int*) args;
+	char buffer [4096];
 
-		int bytes = 0;
-    if((bytes = read(sa->client_socket, buffer, BUF_SZ)) <= 0){
-        close(sa->client_socket);
-    }
-		printf("Message received\n");
+	int bytes = 0;
+  if((bytes = read(*client_socket, buffer, BUF_SZ)) <= 0){
+      close(*client_socket);
+  }
+	printf("Message received\n");
 
-		/* write message to socket */
-		write(sa->client_socket, buffer, strlen(buffer));
-		printf("3-Message sent\n");
+	/* write message to socket */
+	write(*client_socket, buffer, strlen(buffer));
+	printf("3-Message sent\n");
 
-    close(sa->client_socket);  /* close connection */
-		printf("4-Conn closed\n");
+  close(*client_socket);  /* close connection */
+	printf("4-Conn closed\n");
 
 	return NULL;
 }
@@ -84,9 +82,7 @@ int main (int argc, char** argv) {
 		printf("Conn accepted\n");
 		
 		pthread_t tid;
-		MYSTRUCT info;
-		info.client_socket = sa;
-		int ok_ = pthread_create(&tid, NULL, handler, (void*) &info);
+		int ok_ = pthread_create(&tid, NULL, handler, INT2VOIDPTR(sa));
 		if (ok_ != 0) {
 			perror("Usage: pthread_create");
 			exit(EXIT_FAILURE);
@@ -94,7 +90,6 @@ int main (int argc, char** argv) {
 
 		// make it so server doesn't block until request is handled
 		pthread_detach(tid);
-
   }
 
 	return 0;
