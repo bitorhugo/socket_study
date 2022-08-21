@@ -17,14 +17,10 @@
 #define PORT 10010
 #define BUF_SZ 4096
 
-int main (int argc, char** argv) {
-
-	char welcome_msg [] = "Welcome!\n\0";
+int tcp_listener () {
 	int s, b, l, fd, sa, bytes, on = 1;
   struct sockaddr_in channel_srv; /* hold's IP address */
-	struct pollfd poll_fds [MAX_CLIENTS];
-  
-  /* Build address structure to bind to socket. */
+
   memset(&channel_srv, 0, sizeof(channel_srv)); /* zero channel */
   channel_srv.sin_family = AF_INET;
   channel_srv.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -56,10 +52,20 @@ int main (int argc, char** argv) {
       exit(EXIT_FAILURE);
   }
 	printf("Listening..\n");
- 
+
+	return s;
+}
+
+int main (int argc, char** argv) {
+
+	char welcome_msg [] = "Welcome!\n\0";
+  
+	int server = tcp_listener(); 
+
+	struct pollfd poll_fds [MAX_CLIENTS];
 
 	memset(&poll_fds, 0, sizeof(poll_fds));
-	poll_fds[0].fd = s;
+	poll_fds[0].fd = server;
 	poll_fds[0].events = POLLIN;
 	int num_clients = 0;
 
@@ -71,7 +77,7 @@ int main (int argc, char** argv) {
 		if ((res = poll(poll_fds, MAX_CLIENTS, 0) > 0)) {
 			// check if new connection came in
 			if (poll_fds[0].revents & POLLIN) {
-				int client_fd = accept(s, 0, 0);
+				int client_fd = accept(server, 0, 0);
 				//write welcome_msg to client
 				write (client_fd, welcome_msg, strlen(welcome_msg));
 				// check spot for new connection in poll_fd struct

@@ -27,9 +27,10 @@ void non_blocking (void) {
 	int count = 0;
 	int res;
 	struct pollfd pollfd;
-	pollfd.fd = STDIN_FILENO;
-	pollfd.events = POLLIN;
+	pollfd.fd = STDIN_FILENO; // we want to look out for events happening to stdin
+	pollfd.events = POLLIN; // define what type of events we want to look out for
 	
+	// start the event loop
 	while (1) {
 
 		if ((res = poll(&pollfd, 1, 0)) < 0) { // set timeout to 0 so poll won't block
